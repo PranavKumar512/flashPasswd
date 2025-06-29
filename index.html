@@ -2,8 +2,19 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Reset Password</title>
+  <title>Resetting Password</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      text-align: center;
+    }
+    #status {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
   <h2>Resetting Your Password...</h2>
@@ -18,19 +29,26 @@
     const supabase = supabase.createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY);
 
     async function handleRecovery() {
-      const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
       const status = document.getElementById('status');
+      try {
+        const url = window.location.href;
+        const { data, error } = await supabase.auth.exchangeCodeForSession(url);
 
-      if (error) {
-        console.error("Error during recovery:", error.message);
-        status.textContent = "Invalid or expired recovery link.";
-        return;
+        if (error) {
+          console.error("🔴 Recovery error:", error.message);
+          status.textContent = `❌ Recovery failed: ${error.message}`;
+          return;
+        }
+
+        console.log("✅ Session recovered:", data);
+        status.textContent = "✅ Link verified. Redirecting to reset form...";
+        setTimeout(() => {
+          window.location.href = "/update-password.html";
+        }, 1500);
+      } catch (err) {
+        console.error("🔴 Unexpected error:", err);
+        status.textContent = "⚠️ An unexpected error occurred. Check the console.";
       }
-
-      status.textContent = "Link verified. Redirecting to reset form...";
-      setTimeout(() => {
-        window.location.href = "/update-password.html";
-      }, 1000);
     }
 
     handleRecovery();
