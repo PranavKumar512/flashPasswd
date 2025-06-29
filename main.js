@@ -36,7 +36,7 @@ function showSuccess(message) {
   document.body.appendChild(div)
 }
 
-window.resetPassword = async function (event) {
+async function resetPassword(event) {
   event.preventDefault()
   const password = document.getElementById('password').value
 
@@ -47,3 +47,6 @@ window.resetPassword = async function (event) {
     showSuccess('Password updated successfully! You can close this window.')
   }
 }
+
+// ✅ Attach the form submission handler here
+document.getElementById('form').addEventListener('submit', resetPassword)
