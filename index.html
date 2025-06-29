@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Resetting Your Password</title>
+  <title>Resetting Password</title>
   <style>
     body {
       font-family: sans-serif;
@@ -28,23 +28,35 @@
     );
 
     const status = document.getElementById("status");
+    const params = new URLSearchParams(window.location.search);
 
-    try {
-      const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
+    const access_token = params.get("access_token");
+    const refresh_token = params.get("refresh_token");
+    const type = params.get("type");
 
-      if (error) {
-        console.error("❌ Recovery failed:", error.message);
-        status.textContent = `❌ Recovery failed: ${error.message}`;
-      } else {
-        console.log("✅ Session set from URL:", data);
-        status.textContent = "✅ Link verified. Redirecting...";
-        setTimeout(() => {
-          window.location.href = "/update-password.html";
-        }, 1500);
+    if (access_token && refresh_token && type === "recovery") {
+      try {
+        const { data, error } = await supabase.auth.setSession({
+          access_token,
+          refresh_token
+        });
+
+        if (error) {
+          console.error("❌ Recovery failed:", error.message);
+          status.textContent = `❌ Recovery failed: ${error.message}`;
+        } else {
+          console.log("✅ Session set:", data);
+          status.textContent = "✅ Link verified. Redirecting...";
+          setTimeout(() => {
+            window.location.href = "/update-password.html";
+          }, 1500);
+        }
+      } catch (err) {
+        console.error("❌ Unexpected error:", err);
+        status.textContent = "⚠️ Unexpected error. See console.";
       }
-    } catch (err) {
-      console.error("❌ Unexpected error:", err);
-      status.textContent = "⚠️ Unexpected error. See console.";
+    } else {
+      status.textContent = "❌ Invalid or incomplete recovery URL.";
     }
   </script>
 </body>
