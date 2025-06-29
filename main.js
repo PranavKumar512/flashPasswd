@@ -1,8 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
 const supabase = createClient(
-  import.meta.env.SUPABASE_URL
-  import.meta.env.SUPABASE_ANON_KEY
+  window.env.SUPABASE_URL,
+  window.env.SUPABASE_ANON_KEY
 )
 
 const urlParams = new URLSearchParams(window.location.search)
@@ -48,5 +48,4 @@ async function resetPassword(event) {
   }
 }
 
-// ✅ Attach the form submission handler here
 document.getElementById('form').addEventListener('submit', resetPassword)
