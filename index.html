@@ -26,13 +26,13 @@
       SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwbmphYnFwaXhwem1veXhwcWZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5MzI2ODAsImV4cCI6MjA2NjUwODY4MH0.TaL6ohOC6lxR9n5ChFKBdu8YlTyoOfLtWd1GR22Cj74'
     };
 
-    const supabase = supabase.createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY);
+    const client = window.supabase.createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY);
 
     async function handleRecovery() {
       const status = document.getElementById('status');
       try {
         const url = window.location.href;
-        const { data, error } = await supabase.auth.exchangeCodeForSession(url);
+        const { data, error } = await client.auth.exchangeCodeForSession(url);
 
         if (error) {
           console.error("🔴 Recovery error:", error.message);
