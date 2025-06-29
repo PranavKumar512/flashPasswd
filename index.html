@@ -22,30 +22,28 @@
   <script type="module">
     import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-    const env = {
-      SUPABASE_URL: 'https://qpnjabqpixpzmoyxpqff.supabase.co',
-      SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwbmphYnFwaXhwem1veXhwcWZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5MzI2ODAsImV4cCI6MjA2NjUwODY4MH0.TaL6ohOC6lxR9n5ChFKBdu8YlTyoOfLtWd1GR22Cj74'
-    };
-
-    const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY);
+    const supabase = createClient(
+      "https://qpnjabqpixpzmoyxpqff.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwbmphYnFwaXhwem1veXhwcWZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5MzI2ODAsImV4cCI6MjA2NjUwODY4MH0.TaL6ohOC6lxR9n5ChFKBdu8YlTyoOfLtWd1GR22Cj74"
+    );
 
     const status = document.getElementById("status");
 
     try {
-      const { data, error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
+      const { data, error } = await supabase.auth.exchangeCodeForSession(window.location.href);
 
       if (error) {
-        console.error("🔴 Recovery error:", error.message);
+        console.error("❌ Recovery failed:", error.message);
         status.textContent = `❌ Recovery failed: ${error.message}`;
       } else {
-        console.log("✅ Session from URL:", data);
-        status.textContent = "✅ Link verified. Redirecting to password reset form...";
+        console.log("✅ Session set from URL:", data);
+        status.textContent = "✅ Link verified. Redirecting...";
         setTimeout(() => {
           window.location.href = "/update-password.html";
         }, 1500);
       }
     } catch (err) {
-      console.error("🔴 Unexpected error:", err);
+      console.error("❌ Unexpected error:", err);
       status.textContent = "⚠️ Unexpected error. See console.";
     }
   </script>
