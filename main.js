@@ -1,8 +1,8 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
 const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
+  import.meta.env.SUPABASE_URL
+  import.meta.env.SUPABASE_ANON_KEY
 )
 
 const urlParams = new URLSearchParams(window.location.search)
