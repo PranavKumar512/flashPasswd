@@ -32,33 +32,33 @@
       const status = document.getElementById('status');
       const urlParams = new URLSearchParams(window.location.search);
       const accessToken = urlParams.get('access_token');
+      const refreshToken = urlParams.get('refresh_token');
       const type = urlParams.get('type');
 
-      if (!accessToken || type !== 'recovery') {
-        status.textContent = "❌ Invalid or missing recovery token.";
+      if (!accessToken || !refreshToken || type !== 'recovery') {
+        status.textContent = "❌ Invalid or incomplete recovery URL.";
         return;
       }
 
       try {
         const { data, error } = await client.auth.setSession({
           access_token: accessToken,
-          refresh_token: accessToken // Supabase uses same token for recovery
+          refresh_token: refreshToken,
         });
 
         if (error) {
           console.error("🔴 Recovery error:", error.message);
           status.textContent = `❌ Recovery failed: ${error.message}`;
-          return;
+        } else {
+          console.log("✅ Session set:", data);
+          status.textContent = "✅ Link verified. Redirecting...";
+          setTimeout(() => {
+            window.location.href = "/update-password.html";
+          }, 1500);
         }
-
-        console.log("✅ Session set:", data);
-        status.textContent = "✅ Link verified. Redirecting to reset form...";
-        setTimeout(() => {
-          window.location.href = "/update-password.html";
-        }, 1500);
       } catch (err) {
         console.error("🔴 Unexpected error:", err);
-        status.textContent = "⚠️ Unexpected error occurred. Check the console.";
+        status.textContent = "⚠️ Unexpected error. See console.";
       }
     }
 
