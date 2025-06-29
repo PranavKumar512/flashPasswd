@@ -29,18 +29,12 @@
 
     const status = document.getElementById("status");
     const params = new URLSearchParams(window.location.search);
-
-    const access_token = params.get("access_token");
-    const refresh_token = params.get("refresh_token");
+    const code = params.get("code");
     const type = params.get("type");
 
-    if (access_token && refresh_token && type === "recovery") {
+    if (code && type === "recovery") {
       try {
-        const { data, error } = await supabase.auth.setSession({
-          access_token,
-          refresh_token
-        });
-
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
         if (error) {
           console.error("❌ Recovery failed:", error.message);
           status.textContent = `❌ Recovery failed: ${error.message}`;
