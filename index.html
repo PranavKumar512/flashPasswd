@@ -30,9 +30,9 @@
 
     async function handleRecovery() {
       const status = document.getElementById('status');
+
       try {
-        const url = window.location.href;
-        const { data, error } = await client.auth.exchangeCodeForSession(url);
+        const { data, error } = await client.auth.getSessionFromUrl({ storeSession: true });
 
         if (error) {
           console.error("🔴 Recovery error:", error.message);
@@ -41,13 +41,13 @@
         }
 
         console.log("✅ Session recovered:", data);
-        status.textContent = "✅ Link verified. Redirecting to reset form...";
+        status.textContent = "✅ Link verified. Redirecting to password reset form...";
         setTimeout(() => {
           window.location.href = "/update-password.html";
         }, 1500);
       } catch (err) {
         console.error("🔴 Unexpected error:", err);
-        status.textContent = "⚠️ An unexpected error occurred. Check the console.";
+        status.textContent = "⚠️ Unexpected error occurred. See console.";
       }
     }
 
