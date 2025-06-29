@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Resetting Password</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
   <style>
     body {
       font-family: sans-serif;
@@ -30,9 +30,20 @@
 
     async function handleRecovery() {
       const status = document.getElementById('status');
+      const urlParams = new URLSearchParams(window.location.search);
+      const accessToken = urlParams.get('access_token');
+      const type = urlParams.get('type');
+
+      if (!accessToken || type !== 'recovery') {
+        status.textContent = "❌ Invalid or missing recovery token.";
+        return;
+      }
 
       try {
-        const { data, error } = await client.auth.getSessionFromUrl({ storeSession: true });
+        const { data, error } = await client.auth.setSession({
+          access_token: accessToken,
+          refresh_token: accessToken // Supabase uses same token for recovery
+        });
 
         if (error) {
           console.error("🔴 Recovery error:", error.message);
@@ -40,14 +51,14 @@
           return;
         }
 
-        console.log("✅ Session recovered:", data);
-        status.textContent = "✅ Link verified. Redirecting to password reset form...";
+        console.log("✅ Session set:", data);
+        status.textContent = "✅ Link verified. Redirecting to reset form...";
         setTimeout(() => {
           window.location.href = "/update-password.html";
         }, 1500);
       } catch (err) {
         console.error("🔴 Unexpected error:", err);
-        status.textContent = "⚠️ Unexpected error occurred. See console.";
+        status.textContent = "⚠️ Unexpected error occurred. Check the console.";
       }
     }
 
