@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Resetting Password</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@1"></script>
+  <title>Resetting Your Password</title>
   <style>
     body {
       font-family: sans-serif;
@@ -20,49 +19,35 @@
   <h2>Resetting Your Password...</h2>
   <p id="status">Verifying your recovery link...</p>
 
-  <script>
-    const env = window.env || {
+  <script type="module">
+    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+    const env = {
       SUPABASE_URL: 'https://qpnjabqpixpzmoyxpqff.supabase.co',
       SUPABASE_ANON_KEY: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwbmphYnFwaXhwem1veXhwcWZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5MzI2ODAsImV4cCI6MjA2NjUwODY4MH0.TaL6ohOC6lxR9n5ChFKBdu8YlTyoOfLtWd1GR22Cj74'
     };
 
-    const client = window.supabase.createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY);
+    const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY);
 
-    async function handleRecovery() {
-      const status = document.getElementById('status');
-      const urlParams = new URLSearchParams(window.location.search);
-      const accessToken = urlParams.get('access_token');
-      const refreshToken = urlParams.get('refresh_token');
-      const type = urlParams.get('type');
+    const status = document.getElementById("status");
 
-      if (!accessToken || !refreshToken || type !== 'recovery') {
-        status.textContent = "❌ Invalid or incomplete recovery URL.";
-        return;
+    try {
+      const { data, error } = await supabase.auth.getSessionFromUrl({ storeSession: true });
+
+      if (error) {
+        console.error("🔴 Recovery error:", error.message);
+        status.textContent = `❌ Recovery failed: ${error.message}`;
+      } else {
+        console.log("✅ Session from URL:", data);
+        status.textContent = "✅ Link verified. Redirecting to password reset form...";
+        setTimeout(() => {
+          window.location.href = "/update-password.html";
+        }, 1500);
       }
-
-      try {
-        const { data, error } = await client.auth.setSession({
-          access_token: accessToken,
-          refresh_token: refreshToken,
-        });
-
-        if (error) {
-          console.error("🔴 Recovery error:", error.message);
-          status.textContent = `❌ Recovery failed: ${error.message}`;
-        } else {
-          console.log("✅ Session set:", data);
-          status.textContent = "✅ Link verified. Redirecting...";
-          setTimeout(() => {
-            window.location.href = "/update-password.html";
-          }, 1500);
-        }
-      } catch (err) {
-        console.error("🔴 Unexpected error:", err);
-        status.textContent = "⚠️ Unexpected error. See console.";
-      }
+    } catch (err) {
+      console.error("🔴 Unexpected error:", err);
+      status.textContent = "⚠️ Unexpected error. See console.";
     }
-
-    handleRecovery();
   </script>
 </body>
 </html>
