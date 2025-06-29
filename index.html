@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Reset Password</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 400px;
+      margin: 50px auto;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+    }
+    h2 {
+      text-align: center;
+    }
+    input, button {
+      width: 100%;
+      margin: 10px 0;
+      padding: 10px;
+    }
+    .success, .error {
+      text-align: center;
+      font-weight: bold;
+    }
+    .success { color: green; }
+    .error { color: red; }
+  </style>
+  <script src="env.js"></script>
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+    const supabase = createClient(
+      window.env.SUPABASE_URL,
+      window.env.SUPABASE_ANON_KEY
+    )
+
+    const urlParams = new URLSearchParams(window.location.search)
+    const accessToken = urlParams.get('access_token')
+    const type = urlParams.get('type')
+
+    if (accessToken && type === 'recovery') {
+      supabase.auth.exchangeCodeForSession(accessToken).then(({ error }) => {
+        if (error) {
+          showError('Invalid or expired recovery link.')
+        } else {
+          document.getElementById('form').style.display = 'block'
+        }
+      })
+    } else {
+      showError('Invalid recovery link.')
+    }
+
+    function showError(message) {
+      const div = document.createElement('div')
+      div.className = 'error'
+      div.textContent = message
+      document.body.appendChild(div)
+    }
+
+    function showSuccess(message) {
+      document.getElementById('form').style.display = 'none'
+      const div = document.createElement('div')
+      div.className = 'success'
+      div.textContent = message
+      document.body.appendChild(div)
+    }
+
+    async function resetPassword(event) {
+      event.preventDefault()
+      const password = document.getElementById('password').value
+
+      const { error } = await supabase.auth.updateUser({ password })
+      if (error) {
+        showError(error.message)
+      } else {
+        showSuccess('Password updated successfully! You can close this window.')
+      }
+    }
+
+    window.resetPassword = resetPassword
+  </script>
+</head>
+<body>
+  <h2>Reset Your Password</h2>
+  <form id="form" onsubmit="resetPassword(event)" style="display: none;">
+    <input type="password" id="password" placeholder="New Password" required />
+    <button type="submit">Update Password</button>
+  </form>
+</body>
+</html>
