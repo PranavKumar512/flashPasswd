@@ -9,11 +9,16 @@
       padding: 2rem;
       max-width: 400px;
       margin: auto;
+      text-align: center;
     }
     input, button {
       padding: 0.5rem;
       width: 100%;
       margin-bottom: 1rem;
+      font-size: 1rem;
+    }
+    button {
+      cursor: pointer;
     }
     #form-container {
       display: none;
@@ -55,17 +60,17 @@
       });
 
       if (sessionError) {
-        console.warn("Invalid or expired token:", sessionError.message);
-        // Don't show anything to user
+        console.warn("Invalid token: ", sessionError.message);
+        message.textContent = ""; // Don't show anything to user
         return;
       }
 
       const { error } = await supabase.auth.updateUser({ password: newPassword });
 
       if (error) {
-        message.textContent = "Password reset failed: " + error.message;
+        message.textContent = "❌ Failed: " + error.message;
       } else {
-        message.textContent = "✅ Password reset successful. You may now log in.";
+        message.textContent = "✅ Password updated!";
         setTimeout(() => {
           window.location.href = "/";
         }, 3000);
