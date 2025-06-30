@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <title>Reset Your Password</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
       font-family: sans-serif;
@@ -11,63 +10,62 @@
       max-width: 400px;
       margin: auto;
     }
-    input {
+    input, button {
       padding: 0.5rem;
       width: 100%;
       margin-bottom: 1rem;
     }
-    button {
-      padding: 0.5rem 1rem;
-      width: 100%;
-    }
-    #message {
-      margin-top: 1rem;
-      font-weight: bold;
+    #form-container {
+      display: none;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </head>
 <body>
   <h2>Reset Your Password</h2>
-  <input type="password" id="new-password" placeholder="Enter new password" />
-  <button onclick="resetPassword()">Submit</button>
-  <p id="message"></p>
+
+  <div id="form-container">
+    <input type="password" id="new-password" placeholder="Enter new password" />
+    <button onclick="resetPassword()">Submit</button>
+    <p id="message"></p>
+  </div>
 
   <script>
+    const url = new URL(window.location.href);
+    const token = url.searchParams.get("token");
+
     const SUPABASE_URL = "https://qpnjabqpixpzmoyxpqff.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFwbmphYnFwaXhwem1veXhwcWZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA5MzI2ODAsImV4cCI6MjA2NjUwODY4MH0.TaL6ohOC6lxR9n5ChFKBdu8YlTyoOfLtWd1GR22Cj74";
-    const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const accessToken = hashParams.get("access_token");
-    const type = hashParams.get("type");
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const message = document.getElementById("message");
-
-    if (type !== "recovery" || !accessToken) {
-      message.textContent = "❌ Invalid or missing recovery token.";
-    } else {
-      client.auth.setSession({
-        access_token: accessToken,
-        refresh_token: "",
-      }).then(({ error }) => {
-        if (error) {
-          message.textContent = "❌ Failed to verify session: " + error.message;
-        } else {
-          message.textContent = "🔐 Session verified. Enter new password below.";
-        }
-      });
+    if (token) {
+      document.getElementById("form-container").style.display = "block";
     }
 
     async function resetPassword() {
       const newPassword = document.getElementById("new-password").value;
+      const message = document.getElementById("message");
+
       message.textContent = "Processing...";
 
-      const { error } = await client.auth.updateUser({ password: newPassword });
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: token,
+        refresh_token: ""
+      });
+
+      if (sessionError) {
+        console.warn("Invalid or expired token:", sessionError.message);
+        // Don't show anything to user
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+
       if (error) {
-        message.textContent = "❌ Password update failed: " + error.message;
+        message.textContent = "Password reset failed: " + error.message;
       } else {
-        message.textContent = "✅ Password updated successfully! Redirecting...";
+        message.textContent = "✅ Password reset successful. You may now log in.";
         setTimeout(() => {
           window.location.href = "/";
         }, 3000);
